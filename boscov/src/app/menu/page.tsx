@@ -18,10 +18,29 @@ export default function MenuPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        apiFetch("/filmes")
-            .then(res => res.json())
-            .then(data => setFilmes(data))
-            .finally(() => setLoading(false));
+        async function fetchFilmesComAvaliacao() {
+            setLoading(true);
+            const res = await apiFetch("/filmes");
+            const filmesData: Filme[] = await res.json();
+
+            // Busca a média de avaliação para cada filme em paralelo
+            const filmesComAvaliacao = await Promise.all(
+                filmesData.map(async (filme) => {
+                    try {
+                        const resAvaliacao = await apiFetch(`/avaliacoes/media/filme/${filme.id}`);
+                        const { mediaAvaliacao } = await resAvaliacao.json();
+                        return { ...filme, avaliacao: mediaAvaliacao ?? undefined };
+                    } catch {
+                        return { ...filme, avaliacao: undefined };
+                    }
+                })
+            );
+
+            setFilmes(filmesComAvaliacao);
+            setLoading(false);
+        }
+
+        fetchFilmesComAvaliacao();
     }, []);
 
     return (
@@ -30,9 +49,9 @@ export default function MenuPage() {
             <div className="flex flex-1">
                 <Sidebar />
                 <main className="flex-1 p-8">
-                    <h1 className="text-3xl font-bold text-gray-100 mb-8 text-center">
+                    <h2 className="text-3xl font-bold text-gray-100 mb-8 text-center">
                         Descubra e avalie filmes!
-                    </h1>
+                    </h2>
                     {loading ? (
                         <div className="text-gray-400">Carregando filmes...</div>
                     ) : (

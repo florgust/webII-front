@@ -1,12 +1,28 @@
 import Link from "next/link";
 import Image from "next/image";
-import { FiStar, FiEye, FiEdit } from "react-icons/fi";
+import { FiEye, FiEdit } from "react-icons/fi";
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 interface CardFilmeProps {
     id: number;
     nome: string;
     poster: string;
     avaliacao?: number;
+}
+
+function renderStars(avaliacao?: number) {
+    const stars = [];
+    const nota = avaliacao ?? 0;
+    for (let i = 1; i <= 5; i++) {
+        if (nota >= i) {
+            stars.push(<FaStar key={i} className="text-yellow-400" />);
+        } else if (nota >= i - 0.5) {
+            stars.push(<FaStarHalfAlt key={i} className="text-yellow-400" />);
+        } else {
+            stars.push(<FaRegStar key={i} className="text-yellow-400" />);
+        }
+    }
+    return stars;
 }
 
 export default function CardFilme({ id, nome, poster, avaliacao }: Readonly<CardFilmeProps>) {
@@ -23,14 +39,13 @@ export default function CardFilme({ id, nome, poster, avaliacao }: Readonly<Card
                 />
             </div>
             <h2 className="text-lg font-bold text-gray-100 mb-2 text-center line-clamp-2">{nome}</h2>
-            <div className="flex items-center gap-2 mb-4">
-                <FiStar className="text-yellow-400" />
-                <span className="text-gray-200 font-semibold">
+            <div className="flex items-center gap-1 mb-4">
+                {renderStars(avaliacao)}
+                <span className="text-gray-400 font-semibold ml-2">
                     {avaliacao !== undefined ? avaliacao.toFixed(1) : "--"}
                 </span>
                 <span className="text-gray-400 text-sm">/ 5</span>
             </div>
-            {/* mt-auto faz os botões ficarem sempre na base do card */}
             <div className="flex gap-2 w-full mt-auto">
                 <Link
                     href={`/filmes/${id}/avaliar`}
