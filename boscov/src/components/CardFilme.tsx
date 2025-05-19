@@ -3,11 +3,13 @@ import Image from "next/image";
 import { FiEye, FiEdit } from "react-icons/fi";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
+
 interface CardFilmeProps {
     id: number;
     nome: string;
     poster: string;
     avaliacao?: number;
+    onDetalhes?: () => void;
 }
 
 function renderStars(avaliacao?: number) {
@@ -25,7 +27,7 @@ function renderStars(avaliacao?: number) {
     return stars;
 }
 
-export default function CardFilme({ id, nome, poster, avaliacao }: Readonly<CardFilmeProps>) {
+export default function CardFilme({ id, nome, poster, avaliacao, onDetalhes }: Readonly<CardFilmeProps>) {
     return (
         <div className="bg-neutral-900 rounded-xl shadow-lg border border-neutral-800 flex flex-col items-center p-4 transition hover:scale-[1.02] hover:border-gray-600 w-full max-w-xs mx-auto h-full">
             <div className="w-full h-64 relative mb-4">
@@ -55,7 +57,8 @@ export default function CardFilme({ id, nome, poster, avaliacao }: Readonly<Card
                     Avaliar
                 </Link>
                 <Link
-                    href={`/filmes/${id}`}
+                    href="#"
+                    onClick={e => { e.preventDefault(); onDetalhes?.(); }}
                     className="flex-1 flex items-center justify-center gap-2 px-3 py-2 sm:px-2 sm:py-1 rounded border border-neutral-700 hover:bg-neutral-800 text-gray-200 font-medium transition text-base sm:text-sm"
                 >
                     <FiEye />

@@ -5,6 +5,7 @@ import HeaderMenu from "@/components/HeaderMenu";
 import CardFilme from "@/components/CardFilme";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/config/apiFetch";
+import DetailsFilme from "@/components/DetailsFilme";
 
 interface Filme {
     id: number;
@@ -16,6 +17,7 @@ interface Filme {
 export default function MenuPage() {
     const [filmes, setFilmes] = useState<Filme[]>([]);
     const [loading, setLoading] = useState(true);
+    const [modalFilmeId, setModalFilmeId] = useState<number | null>(null);
 
     useEffect(() => {
         async function fetchFilmesComAvaliacao() {
@@ -63,9 +65,13 @@ export default function MenuPage() {
                                     nome={filme.nome}
                                     poster={filme.poster}
                                     avaliacao={filme.avaliacao}
+                                    onDetalhes={() => setModalFilmeId(filme.id)}
                                 />
                             ))}
                         </div>
+                    )}
+                    {modalFilmeId && (
+                        <DetailsFilme id={modalFilmeId} onClose={() => setModalFilmeId(null)} />
                     )}
                 </main>
             </div>
