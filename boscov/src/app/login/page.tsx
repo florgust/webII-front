@@ -43,7 +43,8 @@ export default function LoginPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem("token_usuario", JSON.stringify(data.usuario));
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("usuario", JSON.stringify(data.usuario));
         setModal({ open: true, type: "success", message: "Login realizado com sucesso!" });
         setTimeout(() => {
           setModal({ ...modal, open: false });
