@@ -5,7 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiSearch, FiUser, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 
-export default function HeaderMenu() {
+// ...existing code...
+interface HeaderMenuProps {
+    showSearch?: boolean;
+}
+
+export default function HeaderMenu({ showSearch = true }: HeaderMenuProps) {
     const [search, setSearch] = useState("");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const router = useRouter();
@@ -20,32 +25,32 @@ export default function HeaderMenu() {
     };
 
     const handleLogout = () => {
-        // Aqui você pode adicionar lógica de logout real
         router.push("/logout");
         setMobileMenuOpen(false);
     };
 
     return (
         <header className="w-full bg-neutral-900 border-b border-neutral-800 px-4 py-3 flex items-center justify-between relative z-50">
-            {/* Logo ou nome do app */}
-            <span className="text-2xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-gray-300 via-gray-400 to-gray-600 select-none">
+            <a href="/menu" className="text-2xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-gray-300 via-gray-400 to-gray-600 select-none">
                 Boscov
-            </span>
+            </a>
 
             {/* Desktop: barra de busca e ações */}
-            <form
-                onSubmit={handleSearch}
-                className="hidden md:flex items-center bg-neutral-800 rounded px-3 py-1 mx-4 flex-1 max-w-md"
-            >
-                <FiSearch className="text-gray-400 mr-2" />
-                <input
-                    type="text"
-                    placeholder="Buscar filmes..."
-                    className="bg-transparent outline-none text-gray-200 flex-1 placeholder-gray-400"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-            </form>
+            {showSearch && (
+                <form
+                    onSubmit={handleSearch}
+                    className="hidden md:flex items-center bg-neutral-800 rounded px-3 py-1 mx-4 flex-1 max-w-md"
+                >
+                    <FiSearch className="text-gray-400 mr-2" />
+                    <input
+                        type="text"
+                        placeholder="Buscar filmes..."
+                        className="bg-transparent outline-none text-gray-200 flex-1 placeholder-gray-400"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </form>
+            )}
 
             <nav className="hidden md:flex items-center gap-4">
                 <Link
@@ -76,26 +81,26 @@ export default function HeaderMenu() {
             {/* Mobile: menu lateral */}
             {mobileMenuOpen && (
                 <div className="fixed inset-0 z-40 flex">
-                    {/* Overlay */}
                     <button
                         className="flex-1 bg-black/40"
                         onClick={() => setMobileMenuOpen(false)}
                         aria-label="Fechar menu"
                         tabIndex={0}
-                        style={{ cursor: "pointer" }} // Removido all: "unset"
+                        style={{ cursor: "pointer" }}
                     />
-                    {/* Menu */}
                     <div className="w-64 bg-neutral-900 border-l border-neutral-800 flex flex-col p-6 gap-6 animate-slide-in-right">
-                        <form onSubmit={handleSearch} className="flex items-center bg-neutral-800 rounded px-3 py-2">
-                            <FiSearch className="text-gray-400 mr-2" />
-                            <input
-                                type="text"
-                                placeholder="Buscar filmes..."
-                                className="bg-transparent outline-none text-gray-200 flex-1 placeholder-gray-400"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </form>
+                        {showSearch && (
+                            <form onSubmit={handleSearch} className="flex items-center bg-neutral-800 rounded px-3 py-2">
+                                <FiSearch className="text-gray-400 mr-2" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar filmes..."
+                                    className="bg-transparent outline-none text-gray-200 flex-1 placeholder-gray-400"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </form>
+                        )}
                         <Link
                             href="/perfil"
                             className="flex items-center gap-3 px-3 py-2 rounded hover:bg-neutral-800 text-gray-200 transition"
@@ -115,7 +120,6 @@ export default function HeaderMenu() {
                 </div>
             )}
 
-            {/* Animação do menu lateral */}
             <style>
                 {`
                     @keyframes slide-in-right {
