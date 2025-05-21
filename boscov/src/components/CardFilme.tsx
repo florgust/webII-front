@@ -30,8 +30,8 @@ function renderStars(avaliacao?: number) {
 
 export default function CardFilme({ id, nome, poster, avaliacao, onDetalhes }: Readonly<CardFilmeProps>) {
     const [avaliarOpen, setAvaliarOpen] = useState(false);
+    const [avaliacaoAtual, setAvaliacaoAtual] = useState(avaliacao); // Estado para a avaliação atual
 
-    // Recupera o usuário do localStorage
     let idUsuario: number | null = null;
     if (typeof window !== "undefined") {
         const usuarioLocal = localStorage.getItem("usuario");
@@ -57,9 +57,9 @@ export default function CardFilme({ id, nome, poster, avaliacao, onDetalhes }: R
                 </div>
                 <h2 className="text-lg font-bold text-gray-100 mb-2 text-center line-clamp-2">{nome}</h2>
                 <div className="flex items-center gap-1 mb-4">
-                    {renderStars(avaliacao)}
+                    {renderStars(avaliacaoAtual)} {/* Usa o estado atualizado */}
                     <span className="text-gray-400 font-semibold ml-2">
-                        {avaliacao !== undefined ? avaliacao.toFixed(1) : "--"}
+                        {avaliacaoAtual !== undefined ? avaliacaoAtual.toFixed(1) : "--"}
                     </span>
                     <span className="text-gray-400 text-sm">/ 5</span>
                 </div>
@@ -88,6 +88,7 @@ export default function CardFilme({ id, nome, poster, avaliacao, onDetalhes }: R
                     onClose={() => setAvaliarOpen(false)}
                     idFilme={id}
                     idUsuario={idUsuario}
+                    onSuccess={(novaAvaliacao) => setAvaliacaoAtual(novaAvaliacao)} // Atualiza a avaliação
                 />
             )}
         </>

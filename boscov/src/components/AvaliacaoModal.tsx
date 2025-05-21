@@ -7,7 +7,7 @@ interface AvaliacaoModalProps {
     onClose: () => void;
     idFilme: number;
     idUsuario: number;
-    onSuccess?: () => void;
+    onSuccess?: (novaAvaliacao: number) => void; // Aceita um argumento
 }
 
 export default function AvaliacaoModal({ open, onClose, idFilme, idUsuario, onSuccess }: Readonly<AvaliacaoModalProps>) {
@@ -39,7 +39,7 @@ export default function AvaliacaoModal({ open, onClose, idFilme, idUsuario, onSu
             });
             if (res.ok) {
                 setSucesso(true);
-                onSuccess?.();
+                onSuccess?.(nota);
                 setTimeout(() => {
                     setSucesso(false);
                     onClose();
