@@ -45,7 +45,12 @@ export default function AvaliacaoModal({ open, onClose, idFilme, idUsuario, onSu
                     onClose();
                 }, 1200);
             } else {
-                setErro("Erro ao enviar avaliação.");
+                let msg = "Erro ao enviar avaliação.";
+                try {
+                    const data = await res.json();
+                    if (data && data.message) msg = data.message;
+                } catch { }
+                setErro(msg);
             }
         } catch {
             setErro("Erro ao enviar avaliação.");
