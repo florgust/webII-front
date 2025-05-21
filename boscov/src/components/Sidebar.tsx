@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useUsuario } from "@/hooks/useUsuario";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import LogoutModal from "./LogoutModal";
 
 function UserInfo({ nome, onClick, isMobile }: Readonly<{ nome: string; onClick?: () => void; isMobile?: boolean }>) {
   return (
@@ -21,16 +23,29 @@ function UserInfo({ nome, onClick, isMobile }: Readonly<{ nome: string; onClick?
 }
 
 interface SidebarLinkProps {
-  href: string;
+  href?: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   showText?: boolean;
+  onClick?: () => void;
 }
 
-function SidebarLink({ href, icon, children, showText = true }: Readonly<SidebarLinkProps>) {
+function SidebarLink({ href, icon, children, showText = true, onClick }: Readonly<SidebarLinkProps>) {
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex items-center gap-3 px-4 py-3 rounded hover:bg-neutral-700 text-gray-300 hover:text-white transition-colors font-medium w-full text-left"
+      >
+        <span className="text-xl">{icon}</span>
+        {showText && <span className="whitespace-nowrap">{children}</span>}
+      </button>
+    );
+  }
   return (
     <Link
-      href={href}
+      href={href!}
       className="flex items-center gap-3 px-4 py-3 rounded hover:bg-neutral-700 text-gray-300 hover:text-white transition-colors font-medium"
     >
       <span className="text-xl">{icon}</span>
@@ -43,6 +58,8 @@ export default function Sidebar() {
   const usuario = useUsuario();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const router = useRouter();
 
   let sidebarWidth = "w-64";
   if (isMobile) {
@@ -68,6 +85,17 @@ export default function Sidebar() {
 
   // Overlay para fechar sidebar no mobile
   const handleOverlayClick = () => setIsOpen(false);
+
+  // Logout
+  const handleLogout = () => {
+    localStorage.clear();
+    setLogoutOpen(true);
+  };
+
+  const handleLogoutClose = () => {
+    setLogoutOpen(false);
+    router.push("/");
+  };
 
   return (
     <>
@@ -97,11 +125,12 @@ export default function Sidebar() {
           <SidebarLink href="/perfil" icon="👤" showText={isOpen || !isMobile}>
             Perfil
           </SidebarLink>
-          <SidebarLink href="/logout" icon="🚪" showText={isOpen || !isMobile}>
+          <SidebarLink icon="🚪" showText={isOpen || !isMobile} onClick={handleLogout}>
             Sair
           </SidebarLink>
         </nav>
       </aside>
+      <LogoutModal open={logoutOpen} onClose={handleLogoutClose} />
     </>
   );
 }
