@@ -10,7 +10,7 @@ interface HeaderMenuProps {
     showSearch?: boolean;
 }
 
-export default function HeaderMenu({ showSearch = true }: HeaderMenuProps) {
+export default function HeaderMenu({ showSearch = true }: Readonly<HeaderMenuProps>) {
     const [search, setSearch] = useState("");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [logoutOpen, setLogoutOpen] = useState(false);

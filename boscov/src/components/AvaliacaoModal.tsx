@@ -48,7 +48,7 @@ export default function AvaliacaoModal({ open, onClose, idFilme, idUsuario, onSu
                 let msg = "Erro ao enviar avaliação.";
                 try {
                     const data = await res.json();
-                    if (data && data.message) msg = data.message;
+                    if (data ?? data.message) msg = data.message;
                 } catch { }
                 setErro(msg);
             }
