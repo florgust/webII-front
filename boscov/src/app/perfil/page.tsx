@@ -28,10 +28,10 @@ export default function PerfilPage() {
             const user = JSON.parse(usuarioLocal);
             setUsuario(user);
             setForm({
-                nome: user.nome || "",
-                email: user.email || "",
+                nome: user.nome ?? "",
+                email: user.email ?? "",
                 data_nascimento: user.data_nascimento ? user.data_nascimento.slice(0, 10) : "",
-                apelido: user.apelido || "",
+                apelido: user.apelido ?? "",
             });
         }
     }, []);

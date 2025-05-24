@@ -7,6 +7,7 @@ import ComentariosFilme from "./ComentariosFilmes";
 interface DetailsFilmeProps {
     id: number;
     onClose: () => void;
+    idUsuarioFiltrar?: number;
 }
 
 interface FilmeDetalhes {
@@ -32,10 +33,10 @@ interface Avaliacao {
     status: number;
     createdAt: string;
     updatedAt: string;
-    usuario: { nome: string };
+    usuario: { id: number; nome: string };
 }
 
-export default function DetailsFilme({ id, onClose }: Readonly<DetailsFilmeProps>) {
+export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly<DetailsFilmeProps>) {
     const [filme, setFilme] = useState<FilmeDetalhes | null>(null);
     const [loading, setLoading] = useState(true);
     const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
@@ -162,7 +163,20 @@ export default function DetailsFilme({ id, onClose }: Readonly<DetailsFilmeProps
                     </div>
                 </div>
                 {/* Comentários ocupando toda a largura do modal */}
-                <ComentariosFilme avaliacoes={avaliacoes} loading={loadingComentarios} />
+
+                {/* Comentários ocupando toda a largura do modal */}
+                {typeof idUsuarioFiltrar === "number" ? (
+                    <ComentariosFilme
+                        avaliacoes={avaliacoes}
+                        loading={loadingComentarios}
+                        idUsuarioFiltrar={idUsuarioFiltrar}
+                    />
+                ) : (
+                    <ComentariosFilme
+                        avaliacoes={avaliacoes}
+                        loading={loadingComentarios}
+                    />
+                )}
             </div>
         </div>
     );

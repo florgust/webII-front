@@ -4,10 +4,11 @@ interface ComentariosFilmeProps {
     avaliacoes: {
         id: number;
         comentario: string;
-        usuario: { nome: string };
+        usuario: { id: number, nome: string };
         nota: number; // Adicione a nota aqui
     }[];
     loading: boolean;
+    idUsuarioFiltrar?: number;
 }
 
 function renderStars(nota: number) {
@@ -24,34 +25,29 @@ function renderStars(nota: number) {
     return stars;
 }
 
-export default function ComentariosFilme({ avaliacoes, loading }: Readonly<ComentariosFilmeProps>) {
+export default function ComentariosFilme({ avaliacoes, loading, idUsuarioFiltrar }: Readonly<ComentariosFilmeProps>) {
+    const avaliacoesFiltradas = idUsuarioFiltrar
+        ? avaliacoes.filter(av => av.usuario.id === idUsuarioFiltrar)
+        : avaliacoes;
+
     if (loading) {
         return <div className="text-gray-400">Carregando comentários...</div>;
     }
     if (!avaliacoes.length) return null;
 
     return (
-        <div className="w-full">
-            <h3 className="text-lg font-bold text-gray-100 mb-2">Comentários</h3>
-            <div className="flex flex-col gap-4 max-h-60 overflow-y-auto pr-2 w-full">
-                {avaliacoes.map((avaliacao) => (
-                    <div
-                        key={avaliacao.id}
-                        className="flex flex-col bg-neutral-800 rounded-lg p-3 w-full"
-                    >
-                        <div className="flex items-center gap-3 mb-1">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-neutral-900 flex items-center justify-center text-lg font-bold text-gray-200">
-                                {avaliacao.usuario.nome[0]?.toUpperCase() ?? "U"}
-                            </div>
-                            <div className="font-semibold text-gray-200">{avaliacao.usuario.nome}</div>
-                            <div className="flex items-center ml-auto">
-                                {renderStars(avaliacao.nota)}
-                            </div>
-                        </div>
-                        <div className="text-gray-300 break-words w-full">{avaliacao.comentario}</div>
+        <div className="space-y-4">
+            {avaliacoesFiltradas.map(avaliacao => (
+                <div key={avaliacao.id} className="bg-neutral-800 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="font-semibold text-gray-200">{avaliacao.usuario.nome}</span>
+                        <span className="flex items-center gap-1 ml-auto">
+                            {renderStars(avaliacao.nota)}
+                        </span>
                     </div>
-                ))}
-            </div>
+                    <div className="text-gray-300">{avaliacao.comentario}</div>
+                </div>
+            ))}
         </div>
     );
 }
