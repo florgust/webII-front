@@ -41,19 +41,15 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly
     const [loading, setLoading] = useState(true);
     const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
     const [loadingComentarios, setLoadingComentarios] = useState(true);
+    const [notaUsuario, setNotaUsuario] = useState<number | undefined>(undefined);
+    const [mediaAvaliacao, setMediaAvaliacao] = useState<number | undefined>(undefined);
 
     useEffect(() => {
         async function fetchFilme() {
             setLoading(true);
             const res = await apiFetch(`/filme/${id}`);
             const data = await res.json();
-            let avaliacao = undefined;
-            try {
-                const resAvaliacao = await apiFetch(`/avaliacoes/media/filme/${id}`);
-                const { mediaAvaliacao } = await resAvaliacao.json();
-                avaliacao = mediaAvaliacao ?? undefined;
-            } catch { }
-            setFilme({ ...data, avaliacao });
+            setFilme({ ...data });
             setLoading(false);
         }
         fetchFilme();
@@ -78,6 +74,28 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly
         fetchAvaliacoes();
     }, [id]);
 
+    // Busca a nota do usuário logado (filtra do array de avaliações)
+    useEffect(() => {
+        if (typeof idUsuarioFiltrar === "number") {
+            const avaliacaoUsuario = avaliacoes.find(
+                (av) => av.idUsuario === idUsuarioFiltrar
+            );
+            setNotaUsuario(avaliacaoUsuario ? avaliacaoUsuario.nota : undefined);
+        } else {
+            setNotaUsuario(undefined);
+        }
+    }, [avaliacoes, idUsuarioFiltrar]);
+
+    // Calcula a média geral das avaliações
+    useEffect(() => {
+        if (avaliacoes.length > 0) {
+            const soma = avaliacoes.reduce((acc, av) => acc + av.nota, 0);
+            setMediaAvaliacao(soma / avaliacoes.length);
+        } else {
+            setMediaAvaliacao(undefined);
+        }
+    }, [avaliacoes]);
+
     if (!filme && loading) {
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
@@ -90,6 +108,12 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly
 
     if (!filme) return null;
 
+    let notaExibida: string;
+    if (typeof idUsuarioFiltrar === "number") {
+        notaExibida = typeof notaUsuario === "number" ? notaUsuario.toFixed(1) : "--";
+    } else {
+        notaExibida = typeof mediaAvaliacao === "number" ? mediaAvaliacao.toFixed(1) : "--";
+    }
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 overflow-y-auto">
             <div className="relative bg-neutral-900 rounded-xl shadow-xl border border-neutral-800 w-full max-w-2xl mx-4 p-6 flex flex-col gap-6">
@@ -157,13 +181,14 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly
                         <div className="flex items-center gap-2 mt-4 mb-6">
                             <FiStar className="text-yellow-400" />
                             <span className="text-gray-200 font-semibold">
-                                {filme.avaliacao !== undefined ? filme.avaliacao.toFixed(1) : "--"} / 5
+                                {notaExibida} / 5
+                            </span>
+                            <span className="text-gray-400 text-sm ml-2">
+                                {typeof idUsuarioFiltrar === "number" ? "(Sua avaliação)" : "(Média geral)"}
                             </span>
                         </div>
                     </div>
                 </div>
-                {/* Comentários ocupando toda a largura do modal */}
-
                 {/* Comentários ocupando toda a largura do modal */}
                 {typeof idUsuarioFiltrar === "number" ? (
                     <ComentariosFilme
