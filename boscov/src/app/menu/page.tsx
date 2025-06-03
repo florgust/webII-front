@@ -19,6 +19,14 @@ export default function MenuPage() {
     const [loading, setLoading] = useState(true);
     const [modalFilmeId, setModalFilmeId] = useState<number | null>(null);
 
+    function handleAtualizarAvaliacaoFilme(idFilme: number, novaNota: number) {
+        setFilmes((filmes) =>
+            filmes.map((filme) =>
+                filme.id === idFilme ? { ...filme, avaliacao: novaNota } : filme
+            )
+        );
+    }
+
     useEffect(() => {
         async function fetchFilmesComAvaliacao() {
             setLoading(true);
@@ -66,12 +74,17 @@ export default function MenuPage() {
                                     poster={filme.poster}
                                     avaliacao={filme.avaliacao}
                                     onDetalhes={() => setModalFilmeId(filme.id)}
+                                    onAvaliacao={handleAtualizarAvaliacaoFilme} // <-- adicione esta linha
                                 />
                             ))}
                         </div>
                     )}
                     {modalFilmeId && (
-                        <DetailsFilme id={modalFilmeId} onClose={() => setModalFilmeId(null)} />
+                        <DetailsFilme
+                            id={modalFilmeId}
+                            onClose={() => setModalFilmeId(null)}
+                            onAvaliacaoEditada={handleAtualizarAvaliacaoFilme}
+                        />
                     )}
                 </main>
             </div>

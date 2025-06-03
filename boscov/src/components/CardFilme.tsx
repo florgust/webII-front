@@ -11,6 +11,7 @@ interface CardFilmeProps {
     poster: string;
     avaliacao?: number;
     onDetalhes?: () => void;
+    onAvaliacao?: (idFilme: number, novaNota: number) => void; // <-- adicione
 }
 
 function renderStars(avaliacao?: number) {
@@ -28,7 +29,7 @@ function renderStars(avaliacao?: number) {
     return stars;
 }
 
-export default function CardFilme({ id, nome, poster, avaliacao, onDetalhes }: Readonly<CardFilmeProps>) {
+export default function CardFilme({ id, nome, poster, avaliacao, onDetalhes, onAvaliacao }: Readonly<CardFilmeProps>) {
     const [avaliarOpen, setAvaliarOpen] = useState(false);
 
     let idUsuario: number | null = null;
@@ -87,6 +88,10 @@ export default function CardFilme({ id, nome, poster, avaliacao, onDetalhes }: R
                     onClose={() => setAvaliarOpen(false)}
                     idFilme={id}
                     idUsuario={idUsuario}
+                    onSuccess={(novaNota) => {
+                        if (onAvaliacao) onAvaliacao(id, novaNota); // <-- chama ao avaliar
+                        setAvaliarOpen(false);
+                    }}
                 />
             )}
         </>
