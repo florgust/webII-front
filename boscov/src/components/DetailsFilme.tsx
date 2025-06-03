@@ -3,11 +3,13 @@ import Image from "next/image";
 import { FiX, FiStar } from "react-icons/fi";
 import { apiFetch } from "@/config/apiFetch";
 import ComentariosFilme from "./ComentariosFilmes";
+import ModalEditarAvaliacao from "./EditarAvaliacaoModal";
 
 interface DetailsFilmeProps {
     id: number;
     onClose: () => void;
     idUsuarioFiltrar?: number;
+    onAvaliacaoEditada?: (idFilme: number, novaNota: number) => void; // <-- nova prop
 }
 
 interface FilmeDetalhes {
@@ -36,13 +38,17 @@ interface Avaliacao {
     usuario: { id: number; nome: string };
 }
 
-export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly<DetailsFilmeProps>) {
+export default function DetailsFilme({ id, onClose, idUsuarioFiltrar, onAvaliacaoEditada, }: Readonly<DetailsFilmeProps>) {
     const [filme, setFilme] = useState<FilmeDetalhes | null>(null);
     const [loading, setLoading] = useState(true);
     const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
     const [loadingComentarios, setLoadingComentarios] = useState(true);
     const [notaUsuario, setNotaUsuario] = useState<number | undefined>(undefined);
     const [mediaAvaliacao, setMediaAvaliacao] = useState<number | undefined>(undefined);
+
+    // Controle do modal de edição
+    const [modalEditar, setModalEditar] = useState(false);
+    const [avaliacaoParaEditar, setAvaliacaoParaEditar] = useState<{ id: number; comentario: string; nota: number } | null>(null);
 
     useEffect(() => {
         async function fetchFilme() {
@@ -55,23 +61,26 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly
         fetchFilme();
     }, [id]);
 
-    useEffect(() => {
-        async function fetchAvaliacoes() {
-            setLoadingComentarios(true);
-            let avaliacoesData: Avaliacao[] = [];
-            try {
-                const res = await apiFetch(`/avaliacoes/filme/${id}`);
-                const data = await res.json();
-                if (Array.isArray(data)) {
-                    avaliacoesData = data;
-                }
-            } catch {
-                avaliacoesData = [];
+    // Função para recarregar avaliações (pode ser usada após editar)
+    async function recarregarAvaliacoes() {
+        setLoadingComentarios(true);
+        let avaliacoesData: Avaliacao[] = [];
+        try {
+            const res = await apiFetch(`/avaliacoes/filme/${id}`);
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                avaliacoesData = data;
             }
-            setAvaliacoes(avaliacoesData);
-            setLoadingComentarios(false);
+        } catch {
+            avaliacoesData = [];
         }
-        fetchAvaliacoes();
+        setAvaliacoes(avaliacoesData);
+        setLoadingComentarios(false);
+    }
+
+    useEffect(() => {
+        recarregarAvaliacoes();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     // Busca a nota do usuário logado (filtra do array de avaliações)
@@ -96,6 +105,24 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly
         }
     }, [avaliacoes]);
 
+    // Função para abrir modal de edição
+    function handleEditarAvaliacao(avaliacao: { id: number; comentario: string; nota: number }) {
+        setAvaliacaoParaEditar(avaliacao);
+        setModalEditar(true);
+    }
+
+    function handleFecharModalEditar() {
+        setModalEditar(false);
+        setAvaliacaoParaEditar(null);
+    }
+
+    let notaExibida: string;
+    if (typeof idUsuarioFiltrar === "number") {
+        notaExibida = typeof notaUsuario === "number" ? notaUsuario.toFixed(1) : "--";
+    } else {
+        notaExibida = typeof mediaAvaliacao === "number" ? mediaAvaliacao.toFixed(1) : "--";
+    }
+
     if (!filme && loading) {
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
@@ -108,12 +135,6 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly
 
     if (!filme) return null;
 
-    let notaExibida: string;
-    if (typeof idUsuarioFiltrar === "number") {
-        notaExibida = typeof notaUsuario === "number" ? notaUsuario.toFixed(1) : "--";
-    } else {
-        notaExibida = typeof mediaAvaliacao === "number" ? mediaAvaliacao.toFixed(1) : "--";
-    }
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 overflow-y-auto">
             <div className="relative bg-neutral-900 rounded-xl shadow-xl border border-neutral-800 w-full max-w-2xl mx-4 p-6 flex flex-col gap-6">
@@ -191,11 +212,27 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar }: Readonly
                 </div>
                 {/* Comentários ocupando toda a largura do modal */}
                 {typeof idUsuarioFiltrar === "number" ? (
-                    <ComentariosFilme
-                        avaliacoes={avaliacoes}
-                        loading={loadingComentarios}
-                        idUsuarioFiltrar={idUsuarioFiltrar}
-                    />
+                    <>
+                        <ComentariosFilme
+                            avaliacoes={avaliacoes}
+                            loading={loadingComentarios}
+                            idUsuarioFiltrar={idUsuarioFiltrar}
+                            onEditarAvaliacao={handleEditarAvaliacao}
+                        />
+                        {modalEditar && avaliacaoParaEditar && (
+                            <ModalEditarAvaliacao
+                                avaliacao={avaliacaoParaEditar}
+                                onClose={handleFecharModalEditar}
+                                onSuccess={(novaNota) => {
+                                    recarregarAvaliacoes();
+                                    handleFecharModalEditar();
+                                    if (onAvaliacaoEditada) {
+                                        onAvaliacaoEditada(id, novaNota); // <-- atualiza o pai
+                                    }
+                                }}
+                            />
+                        )}
+                    </>
                 ) : (
                     <ComentariosFilme
                         avaliacoes={avaliacoes}
