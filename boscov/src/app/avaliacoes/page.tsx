@@ -50,6 +50,20 @@ export default function AvaliacoesPage() {
         }
     }, []);
 
+    // Função para recarregar avaliações do usuário
+    async function recarregarAvaliacoesUsuario() {
+        if (!usuario?.id) return;
+        setLoading(true);
+        try {
+            const res = await apiFetch(`/avaliacoes/usuario/${usuario.id}`);
+            const data = await res.json();
+            setAvaliacoes(Array.isArray(data) ? data : []);
+        } catch {
+            setAvaliacoes([]);
+        }
+        setLoading(false);
+    }
+
     useEffect(() => {
         async function fetchAvaliacoesUsuario() {
             setLoading(true);
@@ -59,7 +73,6 @@ export default function AvaliacoesPage() {
                 return;
             }
             try {
-                console.log(`Buscando avaliações para o usuário ${usuario.id}`);
                 const res = await apiFetch(`/avaliacoes/usuario/${usuario.id}`);
                 const data = await res.json();
                 setAvaliacoes(Array.isArray(data) ? data : []);
@@ -74,14 +87,17 @@ export default function AvaliacoesPage() {
     }, [usuario]);
 
     useEffect(() => {
-        console.log("Avaliações salvas:", avaliacoes);
+        // Apenas para debug
+        // console.log("Avaliações salvas:", avaliacoes);
     }, [avaliacoes]);
 
     // Extrai os filmes avaliados pelo usuário (evita duplicidade)
-    // Após setAvaliacoes, busque os filmes:
     useEffect(() => {
         async function fetchFilmesDetalhes() {
-            if (!avaliacoes.length) return;
+            if (!avaliacoes.length) {
+                setFilmesAvaliados([]);
+                return;
+            }
             const filmesDetalhes: Filme[] = [];
             for (const av of avaliacoes) {
                 const res = await apiFetch(`/filme/${av.idFilme}`);
@@ -97,7 +113,7 @@ export default function AvaliacoesPage() {
         }
         fetchFilmesDetalhes();
     }, [avaliacoes]);
-    
+
     let conteudoPrincipal;
     if (loading) {
         conteudoPrincipal = (
@@ -124,6 +140,15 @@ export default function AvaliacoesPage() {
         );
     }
 
+    function handleAtualizarAvaliacaoFilme(idFilme: number, novaNota: number) {
+        setFilmesAvaliados((filmes) =>
+            filmes.map((filme) =>
+                filme.id === idFilme ? { ...filme, avaliacao: novaNota } : filme
+            )
+        );
+    }
+
+
     return (
         <div className="flex flex-col min-h-screen">
             <HeaderMenu />
@@ -137,8 +162,12 @@ export default function AvaliacoesPage() {
                     {modalFilmeId && usuario?.id && (
                         <DetailsFilme
                             id={modalFilmeId}
-                            onClose={() => setModalFilmeId(null)}
+                            onClose={() => {
+                                setModalFilmeId(null);
+                                recarregarAvaliacoesUsuario();
+                            }}
                             idUsuarioFiltrar={usuario.id}
+                            onAvaliacaoEditada={handleAtualizarAvaliacaoFilme}
                         />
                     )}
                 </main>

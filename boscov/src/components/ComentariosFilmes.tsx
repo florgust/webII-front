@@ -5,10 +5,11 @@ interface ComentariosFilmeProps {
         id: number;
         comentario: string;
         usuario: { id: number, nome: string };
-        nota: number; // Adicione a nota aqui
+        nota: number;
     }[];
     loading: boolean;
     idUsuarioFiltrar?: number;
+    onEditarAvaliacao?: (avaliacao: { id: number; comentario: string; nota: number }) => void;
 }
 
 function renderStars(nota: number) {
@@ -25,7 +26,7 @@ function renderStars(nota: number) {
     return stars;
 }
 
-export default function ComentariosFilme({ avaliacoes, loading, idUsuarioFiltrar }: Readonly<ComentariosFilmeProps>) {
+export default function ComentariosFilme({ avaliacoes, loading, idUsuarioFiltrar, onEditarAvaliacao }: Readonly<ComentariosFilmeProps>) {
     const avaliacoesFiltradas = idUsuarioFiltrar
         ? avaliacoes.filter(av => av.usuario.id === idUsuarioFiltrar)
         : avaliacoes;
@@ -44,6 +45,15 @@ export default function ComentariosFilme({ avaliacoes, loading, idUsuarioFiltrar
                         <span className="flex items-center gap-1 ml-auto">
                             {renderStars(avaliacao.nota)}
                         </span>
+                        {idUsuarioFiltrar && onEditarAvaliacao && (
+                            <button
+                                className="ml-2 text-gray-400 hover:text-blue-400 cursor-pointer"
+                                title="Editar avaliação"
+                                onClick={() => onEditarAvaliacao(avaliacao)}
+                            >
+                                ✏️
+                            </button>
+                        )}
                     </div>
                     <div className="text-gray-300">{avaliacao.comentario}</div>
                 </div>
