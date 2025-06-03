@@ -218,6 +218,7 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar, onAvaliaca
                             loading={loadingComentarios}
                             idUsuarioFiltrar={idUsuarioFiltrar}
                             onEditarAvaliacao={handleEditarAvaliacao}
+                            onDeletarAvaliacao={() => recarregarAvaliacoes()}
                         />
                         {modalEditar && avaliacaoParaEditar && (
                             <ModalEditarAvaliacao
