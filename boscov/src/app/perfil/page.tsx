@@ -91,26 +91,28 @@ export default function PerfilPage() {
                     <div className="bg-neutral-800 rounded-lg shadow-lg p-8 w-full max-w-md">
                         <h2 className="text-3xl font-bold text-gray-100 mb-6 text-center">Meu Perfil</h2>
                         <div className="mb-4">
-                            <label className="block text-gray-400 text-sm mb-1">Nome</label>
-                            <div className="bg-neutral-900 text-gray-100 rounded px-3 py-2">{usuario.nome}</div>
+                            <label htmlFor="perfil-nome" className="block text-gray-400 text-sm mb-1">Nome</label>
+                            <span id="perfil-nome" className="bg-neutral-900 text-gray-100 rounded px-3 py-2 block">{usuario.nome}</span>
                         </div>
                         <div className="mb-4">
-                            <label className="block text-gray-400 text-sm mb-1">Apelido</label>
-                            <div className="bg-neutral-900 text-gray-100 rounded px-3 py-2">{usuario.apelido}</div>
+                            <label htmlFor="perfil-apelido" className="block text-gray-400 text-sm mb-1">Apelido</label>
+                            <span id="perfil-apelido" className="bg-neutral-900 text-gray-100 rounded px-3 py-2 block">{usuario.apelido}</span>
                         </div>
                         <div className="mb-4">
-                            <label className="block text-gray-400 text-sm mb-1">Email</label>
-                            <div className="bg-neutral-900 text-gray-100 rounded px-3 py-2">{usuario.email}</div>
+                            <label htmlFor="perfil-email" className="block text-gray-400 text-sm mb-1">Email</label>
+                            <span id="perfil-email" className="bg-neutral-900 text-gray-100 rounded px-3 py-2 block">{usuario.email}</span>
                         </div>
                         <div className="mb-4">
-                            <label className="block text-gray-400 text-sm mb-1">Data de Nascimento</label>
-                            <div className="bg-neutral-900 text-gray-100 rounded px-3 py-2">
-                                {usuario.data_nascimento ? new Date(usuario.data_nascimento).toLocaleDateString() : ""}
-                            </div>
+                            <label htmlFor="perfil-data-nascimento" className="block text-gray-400 text-sm mb-1">Data de Nascimento</label>
+                            <span id="perfil-data-nascimento" className="bg-neutral-900 text-gray-100 rounded px-3 py-2 block">
+                                {form.data_nascimento
+                                    ? form.data_nascimento.split("-").reverse().join("/")
+                                    : ""}
+                            </span>
                         </div>
                         <div className="mb-6">
-                            <label className="block text-gray-400 text-sm mb-1">Tipo de Usuário</label>
-                            <div className="bg-neutral-900 text-gray-100 rounded px-3 py-2 capitalize">{usuario.tipo_usuario}</div>
+                            <label htmlFor="perfil-tipo-usuario" className="block text-gray-400 text-sm mb-1">Tipo de Usuário</label>
+                            <span id="perfil-tipo-usuario" className="bg-neutral-900 text-gray-100 rounded px-3 py-2 block capitalize">{usuario.tipo_usuario}</span>
                         </div>
                         <button
                             onClick={() => setModalOpen(true)}

@@ -9,7 +9,7 @@ interface DetailsFilmeProps {
     id: number;
     onClose: () => void;
     idUsuarioFiltrar?: number;
-    onAvaliacaoEditada?: (idFilme: number, novaNota: number) => void; // <-- nova prop
+    onAvaliacaoEditada?: (idFilme: number, novaNota: number) => void;
 }
 
 interface FilmeDetalhes {
@@ -38,13 +38,21 @@ interface Avaliacao {
     usuario: { id: number; nome: string };
 }
 
-export default function DetailsFilme({ id, onClose, idUsuarioFiltrar, onAvaliacaoEditada, }: Readonly<DetailsFilmeProps>) {
+export default function DetailsFilme({
+    id,
+    onClose,
+    idUsuarioFiltrar,
+    onAvaliacaoEditada,
+}: Readonly<DetailsFilmeProps>) {
     const [filme, setFilme] = useState<FilmeDetalhes | null>(null);
     const [loading, setLoading] = useState(true);
     const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
     const [loadingComentarios, setLoadingComentarios] = useState(true);
     const [notaUsuario, setNotaUsuario] = useState<number | undefined>(undefined);
     const [mediaAvaliacao, setMediaAvaliacao] = useState<number | undefined>(undefined);
+
+    // Novo estado para os gêneros
+    const [generos, setGeneros] = useState<string[]>([]);
 
     // Controle do modal de edição
     const [modalEditar, setModalEditar] = useState(false);
@@ -59,6 +67,24 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar, onAvaliaca
             setLoading(false);
         }
         fetchFilme();
+    }, [id]);
+
+    // Buscar gêneros do filme
+    useEffect(() => {
+        async function fetchGeneros() {
+            try {
+                const res = await apiFetch(`/genero_filme/generos/${id}`);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setGeneros(data.map((g: { descricao: string }) => g.descricao));
+                } else {
+                    setGeneros([]);
+                }
+            } catch {
+                setGeneros([]);
+            }
+        }
+        fetchGeneros();
     }, [id]);
 
     // Função para recarregar avaliações (pode ser usada após editar)
@@ -176,12 +202,12 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar, onAvaliaca
                                 <span className="font-semibold text-gray-400">Diretor: </span>
                                 <span className="text-gray-200">{filme.diretor}</span>
                             </div>
-                            {filme.generos && (
-                                <div className="mb-2">
-                                    <span className="font-semibold text-gray-400">Gêneros: </span>
-                                    <span className="text-gray-200">{filme.generos.join(", ")}</span>
-                                </div>
-                            )}
+                            <div className="mb-2">
+                                <span className="font-semibold text-gray-400">Gêneros: </span>
+                                <span className="text-gray-200">
+                                    {generos.length > 0 ? generos.join(", ") : "Sem gênero"}
+                                </span>
+                            </div>
                             <div className="mb-2">
                                 <span className="font-semibold text-gray-400">Ano: </span>
                                 <span className="text-gray-200">{filme.anoLancamento}</span>
@@ -228,7 +254,7 @@ export default function DetailsFilme({ id, onClose, idUsuarioFiltrar, onAvaliaca
                                     recarregarAvaliacoes();
                                     handleFecharModalEditar();
                                     if (onAvaliacaoEditada) {
-                                        onAvaliacaoEditada(id, novaNota); // <-- atualiza o pai
+                                        onAvaliacaoEditada(id, novaNota);
                                     }
                                 }}
                             />

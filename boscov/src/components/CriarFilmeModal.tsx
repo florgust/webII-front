@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "@/config/apiFetch";
 
 interface CriarFilmeModalProps {
@@ -7,7 +7,8 @@ interface CriarFilmeModalProps {
     onSuccess?: () => void;
 }
 
-const CLASSIFICACOES = ["12+", "14+", "16+", "18+"] as const; //Livre
+const CLASSIFICACOES = ["Livre", "12+", "14+", "16+", "18+"] as const;
+
 export default function CriarFilmeModal({ open, onClose, onSuccess }: Readonly<CriarFilmeModalProps>) {
     const [form, setForm] = useState({
         nome: "",
@@ -21,10 +22,36 @@ export default function CriarFilmeModal({ open, onClose, onSuccess }: Readonly<C
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Gêneros
+    const [generos, setGeneros] = useState<{ id: number; descricao: string }[]>([]);
+    const [generosSelecionados, setGenerosSelecionados] = useState<number[]>([]);
+
+    useEffect(() => {
+        if (!open) return;
+        async function fetchGeneros() {
+            try {
+                const res = await apiFetch("/generos");
+                const data = await res.json();
+                setGeneros(data);
+            } catch {
+                setGeneros([]);
+            }
+        }
+        fetchGeneros();
+    }, [open]);
+
     if (!open) return null;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleGeneroChange = (id: number, checked: boolean) => {
+        if (checked) {
+            setGenerosSelecionados([...generosSelecionados, id]);
+        } else {
+            setGenerosSelecionados(generosSelecionados.filter(gid => gid !== id));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -34,6 +61,7 @@ export default function CriarFilmeModal({ open, onClose, onSuccess }: Readonly<C
 
         try {
             const token = localStorage.getItem("token");
+
             const res = await apiFetch("/filme", {
                 method: "POST",
                 headers: {
@@ -55,6 +83,20 @@ export default function CriarFilmeModal({ open, onClose, onSuccess }: Readonly<C
                 throw new Error("Erro ao criar filme");
             }
 
+            const filmeCriado = await res.json();
+
+            // Associar gêneros selecionados ao filme
+            for (const idGenero of generosSelecionados) {
+                await apiFetch("/genero_filme", {
+                    method: "POST",
+                    headers: {
+                        idgenero: idGenero.toString(),
+                        idfilme: filmeCriado.id.toString(),
+                        "Authorization": `Bearer ${token}`
+                    },
+                });
+            }
+
             setForm({
                 nome: "",
                 diretor: "",
@@ -64,6 +106,7 @@ export default function CriarFilmeModal({ open, onClose, onSuccess }: Readonly<C
                 classificacao: CLASSIFICACOES[0],
                 poster: "",
             });
+            setGenerosSelecionados([]);
 
             if (onSuccess) onSuccess();
             onClose();
@@ -144,6 +187,25 @@ export default function CriarFilmeModal({ open, onClose, onSuccess }: Readonly<C
                         onChange={handleChange}
                         required
                     />
+
+                    {/* Seleção de gêneros */}
+                    <div>
+                        <label className="block text-gray-300 mb-1">Gêneros</label>
+                        <div className="flex flex-wrap gap-2">
+                            {generos.map((g) => (
+                                <label key={g.id} className="flex items-center gap-1 text-gray-200">
+                                    <input
+                                        type="checkbox"
+                                        value={g.id}
+                                        checked={generosSelecionados.includes(g.id)}
+                                        onChange={e => handleGeneroChange(g.id, e.target.checked)}
+                                    />
+                                    {g.descricao}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
                     {error && <div className="text-red-400 text-sm">{error}</div>}
                     <div className="flex justify-end gap-2 mt-2">
                         <button
