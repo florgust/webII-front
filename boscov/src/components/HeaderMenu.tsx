@@ -1,20 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiSearch, FiUser, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import LogoutModal from "./LogoutModal";
+import CriarFilmeModal from "./CriarFilmeModal";
 
 interface HeaderMenuProps {
     showSearch?: boolean;
+    onFilmeCriado?: () => void;
 }
 
-export default function HeaderMenu({ showSearch = true }: HeaderMenuProps) {
+export default function HeaderMenu({ showSearch = true, onFilmeCriado }: Readonly<HeaderMenuProps>) {
     const [search, setSearch] = useState("");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [logoutOpen, setLogoutOpen] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [criarFilmeOpen, setCriarFilmeOpen] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        // Busca o usuário do localStorage e verifica se é admin
+        const usuarioStr = localStorage.getItem("usuario");
+        if (usuarioStr) {
+            try {
+                const usuario = JSON.parse(usuarioStr);
+                setIsAdmin(usuario.tipo_usuario === "admin");
+            } catch {
+                setIsAdmin(false);
+            }
+        }
+    }, []);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,6 +51,12 @@ export default function HeaderMenu({ showSearch = true }: HeaderMenuProps) {
     const handleLogoutClose = () => {
         setLogoutOpen(false);
         router.push("/");
+    };
+
+    // Função para abrir o modal de criar filme
+    const handleAbrirCriarFilme = () => {
+        setCriarFilmeOpen(true);
+        setMobileMenuOpen(false);
     };
 
     return (
@@ -61,6 +84,15 @@ export default function HeaderMenu({ showSearch = true }: HeaderMenuProps) {
                 )}
 
                 <nav className="hidden md:flex items-center gap-4">
+                    {isAdmin && (
+                        <button
+                            type="button"
+                            onClick={handleAbrirCriarFilme}
+                            className="flex items-center gap-2 px-3 py-2 rounded bg-green-700 hover:bg-green-800 text-white transition"
+                        >
+                            + Criar novo filme
+                        </button>
+                    )}
                     <Link
                         href="/perfil"
                         className="flex items-center gap-2 px-3 py-2 rounded hover:bg-neutral-800 text-gray-200 transition"
@@ -109,6 +141,15 @@ export default function HeaderMenu({ showSearch = true }: HeaderMenuProps) {
                                     />
                                 </form>
                             )}
+                            {isAdmin && (
+                                <button
+                                    type="button"
+                                    onClick={handleAbrirCriarFilme}
+                                    className="flex items-center gap-3 px-3 py-2 rounded bg-green-700 hover:bg-green-800 text-white transition"
+                                >
+                                    + Criar novo filme
+                                </button>
+                            )}
                             <Link
                                 href="/perfil"
                                 className="flex items-center gap-3 px-3 py-2 rounded hover:bg-neutral-800 text-gray-200 transition"
@@ -140,6 +181,11 @@ export default function HeaderMenu({ showSearch = true }: HeaderMenuProps) {
                     `}
                 </style>
             </header>
+            <CriarFilmeModal
+                open={criarFilmeOpen}
+                onClose={() => setCriarFilmeOpen(false)}
+                onSuccess={onFilmeCriado}
+            />
             <LogoutModal open={logoutOpen} onClose={handleLogoutClose} />
         </>
     );
