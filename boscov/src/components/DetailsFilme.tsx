@@ -10,6 +10,7 @@ interface DetailsFilmeProps {
     onClose: () => void;
     idUsuarioFiltrar?: number;
     onAvaliacaoEditada?: (idFilme: number, novaNota: number) => void;
+    onFilmeDeletado?: () => void; // Adicione esta prop para notificar deleção
 }
 
 interface FilmeDetalhes {
@@ -43,6 +44,7 @@ export default function DetailsFilme({
     onClose,
     idUsuarioFiltrar,
     onAvaliacaoEditada,
+    onFilmeDeletado,
 }: Readonly<DetailsFilmeProps>) {
     const [filme, setFilme] = useState<FilmeDetalhes | null>(null);
     const [loading, setLoading] = useState(true);
@@ -57,6 +59,23 @@ export default function DetailsFilme({
     // Controle do modal de edição
     const [modalEditar, setModalEditar] = useState(false);
     const [avaliacaoParaEditar, setAvaliacaoParaEditar] = useState<{ id: number; comentario: string; nota: number } | null>(null);
+
+    // Controle de deleção (admin)
+    const [deletando, setDeletando] = useState(false);
+    const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        const usuarioStr = localStorage.getItem("usuario");
+        if (usuarioStr) {
+            try {
+                const usuario = JSON.parse(usuarioStr);
+                setIsAdmin(usuario.tipo_usuario === "admin");
+            } catch {
+                setIsAdmin(false);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         async function fetchFilme() {
@@ -140,6 +159,45 @@ export default function DetailsFilme({
     function handleFecharModalEditar() {
         setModalEditar(false);
         setAvaliacaoParaEditar(null);
+    }
+
+    // Função para deletar filme (admin)
+    async function handleDeleteFilme() {
+        setDeletando(true);
+        try {
+            const token = localStorage.getItem("token");
+            // 1. Deletar avaliações
+            for (const av of avaliacoes) {
+                await apiFetch(`/avaliacao/${av.id}/delete`, {
+                    method: "PUT",
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }
+            // 2. Deletar gêneros
+            const resGeneros = await apiFetch(`/genero_filme/generos/${id}`);
+            const generosFilme = await resGeneros.json();
+            if (Array.isArray(generosFilme)) {
+                for (const g of generosFilme) {
+                    await apiFetch(`/genero_filme/${g.id}/delete`, {
+                        method: "PUT",
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                }
+            }
+            // 3. Deletar filme
+            await apiFetch(`/filme/${id}/delete`, {
+                method: "PUT",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (onClose) onClose();
+            if (onFilmeDeletado) onFilmeDeletado(); // Notifica o pai para atualizar a tela
+        } catch (err) {
+            console.error("Erro ao apagar filme:", err);
+            alert("Erro ao apagar filme.");
+        } finally {
+            setDeletando(false);
+            setShowConfirmDelete(false);
+        }
     }
 
     let notaExibida: string;
@@ -234,6 +292,16 @@ export default function DetailsFilme({
                                 {typeof idUsuarioFiltrar === "number" ? "(Sua avaliação)" : "(Média geral)"}
                             </span>
                         </div>
+                        {/* Botão de apagar filme para admin */}
+                        {isAdmin && (
+                            <button
+                                className="px-4 py-2 rounded bg-red-700 text-white hover:bg-red-800 transition mt-2"
+                                onClick={() => setShowConfirmDelete(true)}
+                                disabled={deletando}
+                            >
+                                Apagar filme
+                            </button>
+                        )}
                     </div>
                 </div>
                 {/* Comentários ocupando toda a largura do modal */}
@@ -267,6 +335,30 @@ export default function DetailsFilme({
                     />
                 )}
             </div>
+            {/* Modal de confirmação de deleção */}
+            {showConfirmDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+                    <div className="bg-neutral-900 p-6 rounded-lg shadow-lg border border-neutral-700 flex flex-col items-center">
+                        <p className="text-gray-200 mb-4">Tem certeza que deseja apagar este filme? Esta ação não pode ser desfeita.</p>
+                        <div className="flex gap-4">
+                            <button
+                                className="px-4 py-2 rounded bg-neutral-700 text-gray-200 hover:bg-neutral-800 transition"
+                                onClick={() => setShowConfirmDelete(false)}
+                                disabled={deletando}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className="px-4 py-2 rounded bg-red-700 text-white hover:bg-red-800 transition"
+                                onClick={handleDeleteFilme}
+                                disabled={deletando}
+                            >
+                                {deletando ? "Apagando..." : "Apagar"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

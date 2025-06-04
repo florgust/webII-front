@@ -97,6 +97,7 @@ export default function MenuPage() {
                             id={modalFilmeId}
                             onClose={() => setModalFilmeId(null)}
                             onAvaliacaoEditada={handleAtualizarAvaliacaoFilme}
+                            onFilmeDeletado={fetchFilmesComAvaliacao}
                         />
                     )}
                 </main>
