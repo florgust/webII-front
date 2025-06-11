@@ -10,10 +10,16 @@ import CriarFilmeModal from "./CriarFilmeModal";
 interface HeaderMenuProps {
     showSearch?: boolean;
     onFilmeCriado?: () => void;
+    search?: string;
+    setSearch?: (value: string) => void;
 }
 
-export default function HeaderMenu({ showSearch = true, onFilmeCriado }: Readonly<HeaderMenuProps>) {
-    const [search, setSearch] = useState("");
+export default function HeaderMenu({
+    showSearch = true,
+    onFilmeCriado,
+    search = "",
+    setSearch,
+}: Readonly<HeaderMenuProps>) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [logoutOpen, setLogoutOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -35,11 +41,7 @@ export default function HeaderMenu({ showSearch = true, onFilmeCriado }: Readonl
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        if (search.trim()) {
-            router.push(`/buscar?query=${encodeURIComponent(search)}`);
-            setSearch("");
-            setMobileMenuOpen(false);
-        }
+        // Não faz nada, busca é local
     };
 
     const handleLogout = () => {
@@ -67,7 +69,7 @@ export default function HeaderMenu({ showSearch = true, onFilmeCriado }: Readonl
                 </a>
 
                 {/* Desktop: barra de busca e ações */}
-                {showSearch && (
+                {showSearch && setSearch && (
                     <form
                         onSubmit={handleSearch}
                         className="hidden md:flex items-center bg-neutral-800 rounded px-3 py-1 mx-4 flex-1 max-w-md"
@@ -129,7 +131,7 @@ export default function HeaderMenu({ showSearch = true, onFilmeCriado }: Readonl
                             style={{ cursor: "pointer" }}
                         />
                         <div className="w-64 bg-neutral-900 border-l border-neutral-800 flex flex-col p-6 gap-6 animate-slide-in-right">
-                            {showSearch && (
+                            {showSearch && setSearch && (
                                 <form onSubmit={handleSearch} className="flex items-center bg-neutral-800 rounded px-3 py-2">
                                     <FiSearch className="text-gray-400 mr-2" />
                                     <input

@@ -20,6 +20,7 @@ export default function MenuPage() {
     const [loading, setLoading] = useState(true);
     const [modalFilmeId, setModalFilmeId] = useState<number | null>(null);
     const [modalSucesso, setModalSucesso] = useState(false);
+    const [search, setSearch] = useState(""); // estado para busca
 
     const fetchFilmesComAvaliacao = async () => {
         setLoading(true);
@@ -61,9 +62,21 @@ export default function MenuPage() {
         setTimeout(() => setModalSucesso(false), 1000); // Fecha o modal após 1s
     };
 
+    // Filtra os filmes pelo nome
+    const filmesFiltrados = search.trim()
+        ? filmes.filter(filme =>
+            filme.nome.toLowerCase().includes(search.trim().toLowerCase())
+        )
+        : filmes;
+
     return (
         <div className="flex flex-col min-h-screen">
-            <HeaderMenu onFilmeCriado={handleFilmeCriado} />
+            <HeaderMenu
+                onFilmeCriado={handleFilmeCriado}
+                showSearch={true}
+                search={search}
+                setSearch={setSearch}
+            />
             <SucessoOuErro
                 open={modalSucesso}
                 type="success"
@@ -79,7 +92,7 @@ export default function MenuPage() {
                         <div className="text-gray-400">Carregando filmes...</div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {filmes.map(filme => (
+                            {filmesFiltrados.map(filme => (
                                 <CardFilme
                                     key={filme.id}
                                     id={filme.id}
@@ -87,7 +100,7 @@ export default function MenuPage() {
                                     poster={filme.poster}
                                     avaliacao={filme.avaliacao}
                                     onDetalhes={() => setModalFilmeId(filme.id)}
-                                    onAvaliacao={handleAtualizarAvaliacaoFilme} // <-- adicione esta linha
+                                    onAvaliacao={handleAtualizarAvaliacaoFilme}
                                 />
                             ))}
                         </div>
