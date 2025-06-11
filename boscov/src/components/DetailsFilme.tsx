@@ -174,14 +174,17 @@ export default function DetailsFilme({
                 });
             }
             // 2. Deletar gêneros
-            const resGeneros = await apiFetch(`/genero_filme/generos/${id}`);
+            const resGeneros = await apiFetch(`/genero_filme/all/${id}`);
+            console.log(resGeneros);
             const generosFilme = await resGeneros.json();
             if (Array.isArray(generosFilme)) {
                 for (const g of generosFilme) {
+                    console.log(`Deletando gênero ${g.id} do filme ${id}`);
                     await apiFetch(`/genero_filme/${g.id}/delete`, {
                         method: "PUT",
                         headers: { Authorization: `Bearer ${token}` },
                     });
+                    console.log(`Gênero ${g.id} deletado com sucesso.`);
                 }
             }
             // 3. Deletar filme
