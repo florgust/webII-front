@@ -121,12 +121,13 @@ export default function Sidebar() {
           style={{ all: "unset", cursor: "pointer" }} // Remove estilos nativos do botão
         />
       )}
-      <aside
+      <div
         className={`
-          z-40 fixed md:static top-0 left-0 h-full
+          z-40 fixed md:sticky md:top-0 left-0 h-screen
           ${sidebarWidth}
-          min-h-screen bg-neutral-900 border-r border-neutral-800 flex flex-col transition-all duration-200
+          bg-neutral-900 border-r border-neutral-800 flex flex-col transition-all duration-200
         `}
+        style={{ top: 0 }}
       >
         <UserInfo nome={usuario?.nome ?? "Usuário"} onClick={handleUserInfoClick} isMobile={isMobile} />
         <nav className="flex flex-col gap-1 mt-6">
@@ -151,7 +152,7 @@ export default function Sidebar() {
             Sair
           </SidebarLink>
         </nav>
-      </aside>
+      </div>
       <LogoutModal open={logoutOpen} onClose={handleLogoutClose} />
     </>
   );
