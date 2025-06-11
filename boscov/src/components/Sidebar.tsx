@@ -61,6 +61,17 @@ export default function Sidebar() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const router = useRouter();
 
+  // Detecta se o usuário é admin
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (usuario && usuario.tipo_usuario === "admin") {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [usuario]);
+
   let sidebarWidth = "w-64";
   if (isMobile) {
     sidebarWidth = isOpen ? "w-48" : "w-16";
@@ -125,6 +136,12 @@ export default function Sidebar() {
           <SidebarLink href="/perfil" icon="👤" showText={isOpen || !isMobile}>
             Perfil
           </SidebarLink>
+          {/* Aba de usuários só para admin */}
+          {isAdmin && (
+            <SidebarLink href="/usuarios" icon="🧑‍💼" showText={isOpen || !isMobile}>
+              Usuários
+            </SidebarLink>
+          )}
           <SidebarLink icon="🚪" showText={isOpen || !isMobile} onClick={handleLogout}>
             Sair
           </SidebarLink>
