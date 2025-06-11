@@ -138,9 +138,14 @@ export default function Sidebar() {
           </SidebarLink>
           {/* Aba de usuários só para admin */}
           {isAdmin && (
-            <SidebarLink href="/usuarios" icon="🧑‍💼" showText={isOpen || !isMobile}>
-              Usuários
-            </SidebarLink>
+            <>
+              <SidebarLink href="/usuarios" icon="🧑‍💼" showText={isOpen || !isMobile}>
+                Usuários
+              </SidebarLink>
+              <SidebarLink href="/filmes" icon="🎞️" showText={isOpen || !isMobile}>
+                Filmes Desativados
+              </SidebarLink>
+            </>
           )}
           <SidebarLink icon="🚪" showText={isOpen || !isMobile} onClick={handleLogout}>
             Sair
