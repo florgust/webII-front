@@ -7,7 +7,7 @@ interface ComentariosFilmeProps {
     avaliacoes: {
         id: number;
         comentario: string;
-        usuario: { id: number, nome: string };
+        usuario: { id: number, nome: string, status: number };
         nota: number;
     }[];
     loading: boolean;
@@ -75,7 +75,12 @@ export default function ComentariosFilme({
             {avaliacoesFiltradas.map(avaliacao => (
                 <div key={avaliacao.id} className="bg-neutral-800 rounded-lg p-4 flex flex-col gap-2">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-gray-200">{avaliacao.usuario.nome}</span>
+                        <span className="font-semibold text-gray-200">
+                            {avaliacao.usuario.nome}
+                            {avaliacao.usuario.status === 0 && (
+                                <span className="ml-2 text-xs text-red-400">(Usuário excluído)</span>
+                            )}
+                        </span>
                         <span className="flex items-center gap-1 ml-auto">
                             {renderStars(avaliacao.nota)}
                         </span>

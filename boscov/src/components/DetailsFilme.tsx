@@ -37,7 +37,7 @@ interface Avaliacao {
     status: number;
     createdAt: string;
     updatedAt: string;
-    usuario: { id: number; nome: string };
+    usuario: { id: number; nome: string, status: number };
 }
 
 export default function DetailsFilme({
