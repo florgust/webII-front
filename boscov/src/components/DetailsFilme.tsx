@@ -4,6 +4,7 @@ import { FiX, FiStar } from "react-icons/fi";
 import { apiFetch } from "@/config/apiFetch";
 import ComentariosFilme from "./ComentariosFilmes";
 import ModalEditarAvaliacao from "./EditarAvaliacaoModal";
+import EditarFilmeModal from "./EditarFilmeModal";
 
 interface DetailsFilmeProps {
     id: number;
@@ -64,6 +65,9 @@ export default function DetailsFilme({
     const [deletando, setDeletando] = useState(false);
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+
+    //Controle de edição filme (admin)
+    const [modalEditarFilme, setModalEditarFilme] = useState(false);
 
     useEffect(() => {
         const usuarioStr = localStorage.getItem("usuario");
@@ -297,13 +301,22 @@ export default function DetailsFilme({
                         </div>
                         {/* Botão de apagar filme para admin */}
                         {isAdmin && (
-                            <button
-                                className="px-4 py-2 rounded bg-red-700 text-white hover:bg-red-800 transition mt-2"
-                                onClick={() => setShowConfirmDelete(true)}
-                                disabled={deletando}
-                            >
-                                Apagar filme
-                            </button>
+                            <div className="flex gap-2 mt-2">
+                                <button
+                                    className="px-4 py-2 rounded bg-blue-700 text-white hover:bg-blue-800 transition"
+                                    onClick={() => setModalEditarFilme(true)}
+                                    disabled={deletando}
+                                >
+                                    Editar filme
+                                </button>
+                                <button
+                                    className="px-4 py-2 rounded bg-red-700 text-white hover:bg-red-800 transition"
+                                    onClick={() => setShowConfirmDelete(true)}
+                                    disabled={deletando}
+                                >
+                                    Apagar filme
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -361,6 +374,23 @@ export default function DetailsFilme({
                         </div>
                     </div>
                 </div>
+            )}
+
+            {modalEditarFilme && filme && (
+                <EditarFilmeModal
+                    open={modalEditarFilme}
+                    onClose={() => setModalEditarFilme(false)}
+                    filme={filme}
+                    onSuccess={async () => {
+                        setModalEditarFilme(false);
+                        // Recarrega os dados do filme após edição
+                        const res = await apiFetch(`/filme/${id}`);
+                        const data = await res.json();
+                        setFilme({ ...data });
+                        // Notifica o pai para atualizar a lista de filmes no menu
+                        if (onFilmeDeletado) onFilmeDeletado();
+                    }}
+                />
             )}
         </div>
     );
