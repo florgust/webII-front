@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
-const PUBLIC_ROUTES = ["/inicial", "/login", "/registrar", "/401", "/403"];
+const PUBLIC_ROUTES = ["/", "/inicial", "/login", "/registrar", "/401", "/403"];
 const ADMIN_ROUTES = ["/filmes", "/usuarios"];
 
 function isAdminRoute(pathname: string) {
